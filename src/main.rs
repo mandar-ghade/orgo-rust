@@ -3,8 +3,9 @@
 use std::{
     borrow::{Borrow, BorrowMut},
     cell::{BorrowMutError, RefCell},
-    collections::{HashMap, HashSet},
+    collections::{linked_list, HashMap, HashSet, LinkedList},
     fmt::Debug,
+    iter::Peekable,
     ops::Index,
     path::Iter,
     rc::Rc,
@@ -102,18 +103,16 @@ impl AtomCounter {
 #[derive(Clone, PartialEq)]
 struct Compound {
     // Atom chain. Composite data-structure of individual `Compound` fragments,
-    // abstraction of an Organic Compound in chemistry, but heavily convoluted
+    // abstraction of an Organic Compound in chemistry
     center: Atom,
-    subst: Vec<Particle>,                    // substituents
-    side_chains: Vec<Rc<RefCell<Compound>>>, // previous compounds
+    substituents: Vec<Particle>, // substituents
 }
 
 impl Debug for Compound {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Compound")
             .field("center", &self.center)
-            .field("subst", &self.subst)
-            .field("side_chains_count", &self.side_chains.len())
+            .field("subst", &self.substituents)
             .finish()
     }
 }
@@ -123,21 +122,8 @@ impl Compound {
     fn new(center: Atom) -> Self {
         Self {
             center,
-            subst: vec![],
-            side_chains: vec![],
+            substituents: Vec::new(),
         }
-    }
-
-    fn with_center(center: Atom) -> Self {
-        Self {
-            center,
-            subst: vec![],
-            side_chains: vec![],
-        }
-    }
-
-    fn as_rc_with_center(center: Atom) -> Rc<RefCell<Compound>> {
-        Self::with_center(center).rc()
     }
 
     fn condensed_formula(&self) -> String {
@@ -145,83 +131,88 @@ impl Compound {
     }
 }
 
-trait ToRc {
-    fn rc(self) -> Rc<RefCell<Self>>;
-}
-
-impl ToRc for Compound {
-    // Converts Compound to `Rc` so operations can be done on it
-    fn rc(self) -> Rc<RefCell<Self>> {
-        Rc::new(RefCell::new(self))
-    }
-}
-
-trait CompoundModifier: Sized {
-    // size of `Self` must be known at compile time
-    type Err;
-    fn add_substituent(&self, p: Particle) -> Result<Self, Self::Err>;
-    fn add_side_chain(&self, chain: Rc<RefCell<Compound>>) -> Result<Self, Self::Err>;
-}
-
-// Iterator of Compounds
 struct Compounds {
-    data: HashMap<Rc<RefCell<Compound>>, Vec<Rc<RefCell<Compound>>>>,
-    // HASHMAP!!!!!!!!!
+    chain: LinkedList<Compound>,
 }
 
-// trait CompoundIterable {
-//     type Err;
-//     fn next_chain(&self) -> Result<Rc<RefCell<Compound>>, Self::Err>;
-//     fn next_substituent(&self) -> Result<&Particle, Self::Err>;
-// }
+impl IntoIterator for Compounds {
+    type Item = Compound;
+    type IntoIter = linked_list::IntoIter<Compound>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.chain.into_iter()
+    }
+}
 
-impl CompoundModifier for Rc<RefCell<Compound>> {
+struct CompoundBuilder {
+    data: HashMap<Rc<RefCell<Compound>>, Rc<RefCell<Compound>>>,
+}
+
+trait Builder: Sized {
+    type Err;
+    fn push(&mut self, p: Particle) -> Self;
+    /// Appends a Compound to itself
+    fn append(&mut self, chain: Compound) -> Self;
+    /// Pops last chain
+    fn pop(&mut self) -> Result<Self, Self::Err>;
+    /// Gets first appended chain
+    fn first_chain(&self) -> Result<Self, Self::Err>;
+    /// Gets last appended chain
+    fn last_chain(&self) -> Result<Self, Self::Err>;
+    /// Goes to previous compound
+    fn super_chain(&self) -> Result<Self, Self::Err>;
+    /// Returns # of chains connected to itself
+    fn chain_len(&self) -> u8;
+}
+
+impl Builder for CompoundBuilder {
     type Err = CompoundUsageError;
-
-    fn add_substituent(&self, p: Particle) -> Result<Self, Self::Err> {
-        (*self)
-            .try_borrow_mut()
-            .map_err(|err| CompoundUsageError::SubstituentPushingError(err.to_string()))?
-            .subst
-            .push(p);
-        Ok(Rc::clone(self))
+    fn push(&mut self, p: Particle) -> Self {
+        todo!("Pushing not implemented")
     }
-    /// Adds a side chain to a `Compound`
-    /// (Extends a `Compound` using an existing chain)
-    ///
-    /// # Arguments
-    /// * `chain` - side_chain which `Compound` is directly attached to now.
-    ///
-    /// Returns
-    ///
-    /// The resulting compound once `chain`  been pushed to `Self`.
-    fn add_side_chain(&self, chain: Rc<RefCell<Compound>>) -> Result<Self, Self::Err> {
-        let same_chain = self.as_ptr() == chain.as_ptr();
-        let borrowed = (*self).try_borrow(); // immut
-        let vec_contains_chain =
-            borrowed.is_ok_and(|b| b.side_chains.iter().any(|c| c.as_ptr() == chain.as_ptr()));
-        if !same_chain && !vec_contains_chain {
-            (*self)
-                .try_borrow_mut()
-                .map_err(|e| CompoundUsageError::CompoundPushingError(e.to_string()))?
-                .side_chains
-                .push(Rc::clone(&chain)); // mut
-            chain.add_side_chain(Rc::clone(self))?; // preserves bi-directionality of compounds
-        }
-        Ok(Rc::clone(self))
+
+    fn append(&mut self, chain: Compound) -> Self {
+        todo!("Appending not implemented")
+    }
+
+    fn pop(&mut self) -> Result<Self, Self::Err> {
+        todo!("Compound chain pop not implemented")
+    }
+
+    fn last_chain(&self) -> Result<Self, Self::Err> {
+        todo!("Last chain not implemented")
+    }
+
+    fn first_chain(&self) -> Result<Self, Self::Err> {
+        todo!("Get first connecting chain not implemented")
+    }
+
+    fn super_chain(&self) -> Result<Self, Self::Err> {
+        todo!("Super chain not implemented")
+    }
+
+    fn chain_len(&self) -> u8 {
+        todo!("Chain lengths not implemented")
     }
 }
+
+// // Iterator of Compounds
+// struct Compounds {
+//     data: HashMap<Rc<RefCell<Compound>>, Vec<Rc<RefCell<Compound>>>>,
+//     next: Rc<RefCell<Compound>>,
+//     idx: u8,
+// }
+//
+// impl Compounds {
+//     fn from_cmp_to_map(
+//         cmp: &Compound,
+//     ) -> HashMap<Rc<RefCell<Compound>>, Vec<Rc<RefCell<Compound>>>> {
+//         todo!();
+//     }
+// }
+//
 
 fn test_compound() -> Result<Rc<RefCell<Compound>>, CompoundUsageError> {
-    let compound = Compound::with_center(Atom::new(3))
-        .rc()
-        .add_substituent(Particle::new_atom(Atom::new(18)))?
-        .add_substituent(Particle::new_molecule(vec![Atom::new(7), Atom::new(7)]))?;
-    let compound2 = Compound::as_rc_with_center(Atom::new(4)).add_side_chain(Rc::clone(&compound));
-    // Self referential side chain appending doesn't work
-    // Ex:
-    // cmp.add_side_chain(Rc::clone(&cmp))?;
-    Ok(compound)
+    todo!("Example code is unfinished");
 }
 
 fn main() {
