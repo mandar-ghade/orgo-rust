@@ -197,22 +197,6 @@ impl Builder for CompoundBuilder {
     }
 }
 
-// // Iterator of Compounds
-// struct Compounds {
-//     data: HashMap<Rc<RefCell<Compound>>, Vec<Rc<RefCell<Compound>>>>,
-//     next: Rc<RefCell<Compound>>,
-//     idx: u8,
-// }
-//
-// impl Compounds {
-//     fn from_cmp_to_map(
-//         cmp: &Compound,
-//     ) -> HashMap<Rc<RefCell<Compound>>, Vec<Rc<RefCell<Compound>>>> {
-//         todo!();
-//     }
-// }
-//
-
 fn test_compound() -> Result<Rc<RefCell<Compound>>, CompoundUsageError> {
     todo!("Example code is unfinished");
 }
