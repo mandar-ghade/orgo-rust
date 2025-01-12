@@ -140,6 +140,8 @@ impl IntoIterator for Compounds {
 
 struct CompoundBuilder {
     data: HashMap<Rc<RefCell<Compound>>, Rc<RefCell<Compound>>>,
+    parent: Rc<RefCell<Compound>>,
+    curr: Rc<RefCell<Compound>>,
 }
 
 trait Builder: Sized {
