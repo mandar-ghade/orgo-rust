@@ -14,11 +14,6 @@ use std::{
 use strum_macros::Display;
 use thiserror::Error;
 
-enum Chirality {
-    R,
-    S,
-}
-
 #[allow(unused)]
 #[derive(Clone, Debug, PartialEq)]
 struct Element {
