@@ -107,7 +107,7 @@ impl Debug for Compound {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Compound")
             .field("center", &self.center)
-            .field("subst", &self.substituents)
+            .field("substituents", &self.substituents)
             .finish()
     }
 }
@@ -150,15 +150,16 @@ trait Builder: Sized {
     /// Appends a Compound to itself
     fn append(&mut self, chain: Compound) -> Self;
     /// Pops last chain
-    fn pop(&mut self) -> Result<Self, Self::Err>;
+    fn pop(&mut self) -> Self;
     /// Gets first appended chain
-    fn first_chain(&self) -> Result<Self, Self::Err>;
+    fn first_chain(&self) -> Self;
     /// Gets last appended chain
-    fn last_chain(&self) -> Result<Self, Self::Err>;
+    fn last_chain(&self) -> Self;
     /// Goes to previous compound
-    fn super_chain(&self) -> Result<Self, Self::Err>;
+    fn super_chain(&self) -> Self;
     /// Returns # of chains connected to itself
     fn chain_len(&self) -> u8;
+    fn build(&self) -> Result<Compounds, Self::Err>;
 }
 
 impl Builder for CompoundBuilder {
@@ -171,24 +172,28 @@ impl Builder for CompoundBuilder {
         todo!("Appending not implemented")
     }
 
-    fn pop(&mut self) -> Result<Self, Self::Err> {
+    fn pop(&mut self) -> Self {
         todo!("Compound chain pop not implemented")
     }
 
-    fn last_chain(&self) -> Result<Self, Self::Err> {
+    fn last_chain(&self) -> Self {
         todo!("Last chain not implemented")
     }
 
-    fn first_chain(&self) -> Result<Self, Self::Err> {
+    fn first_chain(&self) -> Self {
         todo!("Get first connecting chain not implemented")
     }
 
-    fn super_chain(&self) -> Result<Self, Self::Err> {
+    fn super_chain(&self) -> Self {
         todo!("Super chain not implemented")
     }
 
     fn chain_len(&self) -> u8 {
         todo!("Chain lengths not implemented")
+    }
+
+    fn build(&self) -> Result<Compounds, Self::Err> {
+        todo!("Compound building not implemented")
     }
 }
 
