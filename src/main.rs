@@ -159,6 +159,7 @@ trait Builder: Sized {
     fn super_chain(&self) -> Self;
     /// Returns # of chains connected to itself
     fn chain_len(&self) -> u8;
+    /// Builds Compound once operations have been completed.
     fn build(&self) -> Result<Compounds, Self::Err>;
 }
 
