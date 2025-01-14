@@ -97,6 +97,10 @@ impl Debug for Compound {
 
 impl Compound {
     // Creates a `Compound` with initial center `Atom`
+    fn builder() -> CompoundBuilder {
+        CompoundBuilder::default()
+    }
+
     fn new(center: Atom) -> Self {
         Self {
             center,
@@ -105,7 +109,7 @@ impl Compound {
     }
 
     fn condensed_formula(&self) -> String {
-        todo!()
+        todo!("Condensed formula fetching not implemented")
     }
 }
 
@@ -121,10 +125,11 @@ impl IntoIterator for Compounds {
     }
 }
 
+#[derive(Default)]
 struct CompoundBuilder {
-    data: HashMap<Rc<RefCell<Compound>>, Rc<RefCell<Compound>>>,
-    parent: Rc<RefCell<Compound>>,
-    curr: Rc<RefCell<Compound>>,
+    data: HashMap<u8, u8>,
+    parent: u8,
+    curr: u8,
 }
 
 trait Builder: Sized {
@@ -178,6 +183,12 @@ impl Builder for CompoundBuilder {
 
     fn build(&self) -> Result<Compounds, Self::Err> {
         todo!("Compound building not implemented")
+    }
+}
+
+impl CompoundBuilder {
+    fn new() -> Self {
+        Self::default()
     }
 }
 
