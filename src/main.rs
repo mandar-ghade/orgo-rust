@@ -151,8 +151,16 @@ trait Builder: Sized {
 impl Builder for CompoundBuilder {
     type Err = CompoundUsageError;
 
-    fn chain(self, n: u8) -> Self {
-        todo!()
+    fn chain(mut self, n: u8) -> Self {
+        self.curr += n;
+        if self.parent_len == 0 {
+            self.parent_len = n;
+        }
+        let size = self.all.len();
+        for i in size..size + (n as usize) {
+            self.data.entry(i as u8).or_default();
+        }
+        self
     }
 
     fn chain_at(self, n: u8) -> Self {
