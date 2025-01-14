@@ -126,9 +126,11 @@ impl IntoIterator for Compounds {
 }
 
 #[derive(Default)]
+#[allow(unused)]
 struct CompoundBuilder {
     data: HashMap<u8, Vec<u8>>,
-    parent: u8,
+    all: Vec<Compound>,
+    parent_len: u8,
     curr: u8,
 }
 
