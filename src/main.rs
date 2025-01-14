@@ -136,8 +136,14 @@ struct CompoundBuilder {
 
 trait Builder: Sized {
     type Err;
+    /// chains `n` carbons linearly
+    fn chain(self, n: u8) -> Self;
+    /// Chains `n` carbons at a locant
+    fn chain_at(self, n: u8) -> Self;
     /// Returns # of chains connected to itself
     fn chain_len(&self) -> u8;
+    // Finds longest chain and converts that into a LinkedList
+    fn to_linked_list(&self) -> LinkedList<Compound>;
     /// Builds Compound once operations have been completed.
     fn build(&self) -> Result<Compounds, Self::Err>;
 }
@@ -145,12 +151,27 @@ trait Builder: Sized {
 impl Builder for CompoundBuilder {
     type Err = CompoundUsageError;
 
+    fn chain(self, n: u8) -> Self {
+        todo!()
+    }
+
+    fn chain_at(self, n: u8) -> Self {
+        todo!()
+    }
+
     fn chain_len(&self) -> u8 {
-        todo!("Chain lengths not implemented")
+        todo!()
+    }
+
+    fn to_linked_list(&self) -> LinkedList<Compound> {
+        // non-public
+        todo!();
     }
 
     fn build(&self) -> Result<Compounds, Self::Err> {
-        todo!("Compound building not implemented")
+        Ok(Compounds {
+            chain: self.to_linked_list(),
+        })
     }
 }
 
