@@ -97,8 +97,8 @@ impl Debug for Compound {
 
 impl Compound {
     // Creates a `Compound` with initial center `Atom`
-    fn builder() -> CompoundBuilder {
-        CompoundBuilder::default()
+    fn builder() -> OrganicCompoundBuilder {
+        OrganicCompoundBuilder::default()
     }
 
     fn new(center: Atom) -> Self {
@@ -127,7 +127,7 @@ impl IntoIterator for Compounds {
 
 #[derive(Default)]
 #[allow(unused)]
-struct CompoundBuilder {
+struct OrganicCompoundBuilder {
     data: HashMap<u8, Vec<u8>>,
     all: Vec<Compound>,
     parent_len: u8,
@@ -145,10 +145,10 @@ trait Builder: Sized {
     // Finds longest chain and converts that into a LinkedList
     fn to_linked_list(&self) -> LinkedList<Compound>;
     /// Builds Compound once operations have been completed.
-    fn build(&self) -> Compounds;
+    fn build(self) -> Compounds;
 }
 
-impl Builder for CompoundBuilder {
+impl Builder for OrganicCompoundBuilder {
     type Err = CompoundUsageError;
 
     fn chain(mut self, n: u8) -> Self {
@@ -176,14 +176,14 @@ impl Builder for CompoundBuilder {
         todo!();
     }
 
-    fn build(&self) -> Compounds {
+    fn build(self) -> Compounds {
         Compounds {
             chain: self.to_linked_list(),
         }
     }
 }
 
-impl CompoundBuilder {
+impl OrganicCompoundBuilder {
     fn new() -> Self {
         Self::default()
     }
