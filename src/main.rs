@@ -77,23 +77,6 @@ impl Particle {
     }
 }
 
-struct AtomCounter {
-    atoms: HashMap<u8, u8>,
-}
-
-impl ToString for AtomCounter {
-    fn to_string(&self) -> String {
-        todo!()
-    }
-}
-
-// utilize compound iterable class
-impl AtomCounter {
-    fn from_compound(cmp: &Compound) -> Self {
-        todo!()
-    }
-}
-
 #[allow(unused)]
 #[derive(Clone, PartialEq)]
 struct Compound {
@@ -122,7 +105,7 @@ impl Compound {
     }
 
     fn condensed_formula(&self) -> String {
-        AtomCounter::from_compound(self).to_string()
+        todo!()
     }
 }
 
