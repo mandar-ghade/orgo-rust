@@ -134,17 +134,6 @@ struct CompoundBuilder {
 
 trait Builder: Sized {
     type Err;
-    fn push(&mut self, p: Particle) -> Self;
-    /// Appends a Compound to itself
-    fn append(&mut self, chain: Compound) -> Self;
-    /// Pops last chain
-    fn pop(&mut self) -> Self;
-    /// Gets first appended chain
-    fn first_chain(&self) -> Self;
-    /// Gets last appended chain
-    fn last_chain(&self) -> Self;
-    /// Goes to previous compound
-    fn super_chain(&self) -> Self;
     /// Returns # of chains connected to itself
     fn chain_len(&self) -> u8;
     /// Builds Compound once operations have been completed.
@@ -153,29 +142,6 @@ trait Builder: Sized {
 
 impl Builder for CompoundBuilder {
     type Err = CompoundUsageError;
-    fn push(&mut self, p: Particle) -> Self {
-        todo!("Pushing not implemented")
-    }
-
-    fn append(&mut self, chain: Compound) -> Self {
-        todo!("Appending not implemented")
-    }
-
-    fn pop(&mut self) -> Self {
-        todo!("Compound chain pop not implemented")
-    }
-
-    fn last_chain(&self) -> Self {
-        todo!("Last chain not implemented")
-    }
-
-    fn first_chain(&self) -> Self {
-        todo!("Get first connecting chain not implemented")
-    }
-
-    fn super_chain(&self) -> Self {
-        todo!("Super chain not implemented")
-    }
 
     fn chain_len(&self) -> u8 {
         todo!("Chain lengths not implemented")
