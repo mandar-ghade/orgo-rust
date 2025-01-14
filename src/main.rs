@@ -145,7 +145,7 @@ trait Builder: Sized {
     // Finds longest chain and converts that into a LinkedList
     fn to_linked_list(&self) -> LinkedList<Compound>;
     /// Builds Compound once operations have been completed.
-    fn build(&self) -> Result<Compounds, Self::Err>;
+    fn build(&self) -> Compounds;
 }
 
 impl Builder for CompoundBuilder {
@@ -168,10 +168,10 @@ impl Builder for CompoundBuilder {
         todo!();
     }
 
-    fn build(&self) -> Result<Compounds, Self::Err> {
-        Ok(Compounds {
+    fn build(&self) -> Compounds {
+        Compounds {
             chain: self.to_linked_list(),
-        })
+        }
     }
 }
 
