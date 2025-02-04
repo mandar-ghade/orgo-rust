@@ -113,15 +113,31 @@ impl Compound {
     }
 }
 
-struct Compounds {
-    chain: LinkedList<Compound>,
+enum Compounds {
+    Compound(Compound),
+    Chain(LinkedList<Compounds>),
+}
+
+impl Compounds {
+    fn flatten(&self) -> Vec<Compound> {
+        let mut all: Vec<Compound> = Vec::new();
+        match self {
+            Self::Compound(c) => all.push(c.clone()),
+            Self::Chain(c) => {
+                for item in c.iter() {
+                    all.extend(item.flatten())
+                }
+            }
+        }
+        all
+    }
 }
 
 impl IntoIterator for Compounds {
     type Item = Compound;
-    type IntoIter = linked_list::IntoIter<Compound>;
+    type IntoIter = std::vec::IntoIter<Compound>;
     fn into_iter(self) -> Self::IntoIter {
-        self.chain.into_iter()
+        self.flatten().into_iter()
     }
 }
 
@@ -130,56 +146,90 @@ impl IntoIterator for Compounds {
 struct OrganicCompoundBuilder {
     data: HashMap<u8, Vec<u8>>,
     all: Vec<Compound>,
-    parent_len: u8,
-    curr: u8,
+    parent_chain: u8,
+    curr_size: u8,
 }
 
+#[allow(unused)]
 trait Builder: Sized {
     type Err;
     /// chains `n` carbons linearly
     fn chain(self, n: u8) -> Self;
     /// Chains `n` carbons at a locant
-    fn chain_at(self, n: u8) -> Self;
+    fn chain_at(self, locant: u8, n: u8) -> Self;
     /// Returns # of chains connected to itself
     fn chain_len(&self) -> u8;
-    // Finds longest chain and converts that into a LinkedList
-    fn to_linked_list(&self) -> LinkedList<Compound>;
+    // Converts chain into LinkedList
+    fn to_linked_list(&self) -> LinkedList<Compounds>;
     /// Builds Compound once operations have been completed.
     fn build(self) -> Compounds;
+}
+
+impl OrganicCompoundBuilder {
+    fn fetch_nodes(&self, i: u8) -> Vec<&u8> {
+        todo!()
+    }
+    fn empty_parent_chain(&self) -> bool {
+        self.parent_chain == 0
+    }
+    fn idx_exists(&self) -> bool {
+        true
+    }
+    fn chain_exists(&self) -> bool {
+        true
+    }
 }
 
 impl Builder for OrganicCompoundBuilder {
     type Err = CompoundUsageError;
 
     fn chain(mut self, n: u8) -> Self {
-        self.curr += n;
-        if self.parent_len == 0 {
-            self.parent_len = n;
+        if self.parent_chain == 0 {
+            self.parent_chain = n;
         }
-        let size = self.all.len();
-        for i in size..size + (n as usize) {
-            self.data.entry(i as u8).or_default();
+        let size = self.curr_size;
+        for i in size..size + n {
+            self.data.entry(i).or_default();
         }
+        self.curr_size += n;
         self
     }
 
-    fn chain_at(self, n: u8) -> Self {
-        todo!()
+    fn chain_at(mut self, locant: u8, size: u8) -> Self {
+        let idx = locant - 1; // n is locant, so idx is 1 less
+        if self.empty_parent_chain() {
+            panic!("Parent chain not specified")
+        } else if idx > self.parent_chain || !self.data.contains_key(&idx) {
+            panic!("Parent chain not identified");
+        }
+        let start_idx = self.curr_size;
+        self.curr_size += size;
+        self.data
+            .get_mut(&idx)
+            .expect("Expected mutable parent compound")
+            .push(start_idx);
+        self
     }
 
     fn chain_len(&self) -> u8 {
-        todo!()
+        self.parent_chain
     }
 
-    fn to_linked_list(&self) -> LinkedList<Compound> {
+    fn to_linked_list(&self) -> LinkedList<Compounds> {
         // non-public
         todo!();
     }
 
     fn build(self) -> Compounds {
-        Compounds {
-            chain: self.to_linked_list(),
+        if self.curr_size == 1 {
+            return Compounds::Compound(
+                self.all
+                    .first()
+                    .expect("Should've gotten first Element")
+                    .clone(),
+            );
         }
+        Compounds::Chain(self.to_linked_list())
     }
 }
 
@@ -189,10 +239,10 @@ impl OrganicCompoundBuilder {
     }
 }
 
-fn test_compound() -> Result<Rc<RefCell<Compound>>, CompoundUsageError> {
-    todo!("Example code is unfinished");
+fn test_compound() -> Compounds {
+    OrganicCompoundBuilder::new().chain(6).build()
 }
 
 fn main() {
-    dbg!(test_compound());
+    test_compound();
 }
